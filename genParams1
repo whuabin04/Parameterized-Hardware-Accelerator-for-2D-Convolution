@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+
+# script to generate the params.sv file based on the command line parameters
+# usage: ./genParams1 [INW] [OUTW] [PIPELINED]
+#    where you will replace [INW] [OUTW] and [PIPELINED] with the desired value of 
+#    those parameters 
+# example: for INW=8, OUTW=24, PIPELINED=0, run: ./genParams1 8 24 0
+
+if [ $# -ne 3 ]; then
+    echo "ERROR: incorrect number of parameters given."
+    echo "Usage: ./genParams1 [INW] [OUTW] [PIPELINED]"
+    echo "See comments in genParams1 file for more information"
+else
+    echo "\`define INWVAL $1" > params.sv
+    echo "\`define OUTWVAL $2" >> params.sv
+    echo "\`define PIPELINEDVAL $3" >> params.sv
+fi

@@ -1,0 +1,258 @@
+Stony Brook University
+Fall 2025 ESE 507 
+Professor Peter Milder
+Huabin Wu (115067644)
+Ryan Lin (114737153)
+Part 1: Status Report
+
+*********************************************************************************************
+o In this file, state explicitly if your design fully works or not, and explain how you
+tested it.
+o If the design has any known problems, clearly document them. (You do not need
+to explain prior problems that are now solved. I just want to see details of any
+remaining bugs you are aware of in the submitted design.)
+o Similarly, if you have any uncorrected synthesizability problems, document them
+here.
+o For example, if it fails simulation or synthesis under certain sets of parameters or
+situations, explain them to the best of your ability.
+o If your design is perfect, your status report should be very short. Simply state how
+you tested it, and that you do not observe any problems with your system.
+*********************************************************************************************
+
+The design for both pipelinedd and unpipelined MAC unit both work completely as intended.
+
+In the piped MAC version module, we decided to make the design more deterministic by 
+initializing signals upon asserted "reset" signals. 
+
+We piped the "input_valid" signal with a temporary signal named "enable_accumulate" towards 
+the accumulator register unit following the multiplication unit.
+
+Instead of checking if "input_valid" is asserted for multiplcations, and then manually 
+assigning a logic 1 to "enable_accumulate", the value of "input_valid" is assigned to it 
+at each edge instead along side the input multiplcations. 
+
+This allowed our design to increase the SLACK time met from 4.5ns to 5.1ns. 
+
+=====================
+UNPIPED
+=====================
+
+frequency: (1/1.25ns) 
+total_cell_area: 2092.887991
+total_dynamic_power: 1.6767 mW
+cell_leakage_power: 46.7592 uW
+slack_MET: None
+data_arrival_time: 1.29
+start/end: Startpoint: input0[4] (input port clocked by clk) Endpoint: out_reg[42] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/1.375ns)
+total_cell_area: 2033.56999
+total_dynamic_power: 1.4966 mW
+cell_leakage_power: 45.3946 uW
+slack: 0.0
+data_arrival_time: 1.34
+start/end: Startpoint: input0[7] (input port clocked by clk) Endpoint: out_reg[52] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/1.5ns)
+total_cell_area: 2105.655988
+total_dynamic_power: 1.3759 mW
+cell_leakage_power: 46.6764 uW
+slack: 0.0
+data_arrival_time: 1.46
+start/end: Startpoint: input0[13] (input port clocked by clk) Endpoint: out_reg[41] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/1.75ns)
+total_cell_area: 2057.775989
+total_dynamic_power: 1.1410 mW
+cell_leakage_power: 45.3218 uW
+slack: 0.01
+data_arrival_time: 1.71
+start/end: Startpoint: input0[5] (input port clocked by clk) Endpoint: out_reg[62] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/2ns)
+total_cell_area: 2041.283989
+total_dynamic_power: 1.0054 mW
+cell_leakage_power: 44.6582 uW
+slack: 0.01
+data_arrival_time: 1.96
+start/end: Startpoint: input0[0] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/3ns)
+total_cell_area: 2007.501989
+total_dynamic_power: 659.2897 uW
+cell_leakage_power: 43.6944 uW
+slack: 0.02
+data_arrival_time: 2.95
+start/end: Startpoint: input0[3] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/4ns)
+total_cell_area: 1959.887988
+total_dynamic_power: 469.8978 uW
+cell_leakage_power: 42.0895 uW
+slack: 0.0
+data_arrival_time: 3.97
+start/end: Startpoint: input0[4] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/5ns)
+total_cell_area: 1759.324001
+total_dynamic_power: 360.5876 uW
+cell_leakage_power: 39.4458 uW
+slack: 0.0
+data_arrival_time: 4.95
+start/end: Startpoint: input0[1] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/6ns)
+total_cell_area: 1726.074004
+total_dynamic_power: 285.7602 uW
+cell_leakage_power: 38.4291 uW
+slack: 0.5
+data_arrival_time: 5.46
+start/end: Startpoint: input0[3] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/7ns)
+total_cell_area: 1726.606004
+total_dynamic_power: 244.9227 uW
+cell_leakage_power: 38.4279 uW
+slack: 1.5
+data_arrival_time: 5.46
+start/end: Startpoint: input0[3] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/8ns)
+total_cell_area: 1726.606004
+total_dynamic_power: 214.3073 uW
+cell_leakage_power: 38.4279 uW
+slack: 2.5
+data_arrival_time: 5.46
+start/end: Startpoint: input0[3] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/9ns)
+total_cell_area: 1726.606004
+total_dynamic_power: 190.4954 uW
+cell_leakage_power: 38.4279 uW
+slack: 3.5
+data_arrival_time: 5.46
+start/end: Startpoint: input0[3] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/10ns)
+total_cell_area: 1726.606004
+total_dynamic_power: 171.4459 uW
+cell_leakage_power: 38.4279 uW
+slack: 4.5
+data_arrival_time: 5.46
+start/end: Startpoint: input0[3] (input port clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+========================
+PIPED
+========================
+
+frequency: (1/10ns)
+total_cell_area: 1853.22199
+total_dynamic_power: 186.5455 uW
+cell_leakage_power: 39.6796 uW
+slack: 5.1
+data_arrival_time: 4.87
+start/end: Startpoint: out_reg[0] (rising edge-triggered flip-flop clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/9ns)
+total_cell_area: 1853.22199
+total_dynamic_power: 207.2728 uW
+cell_leakage_power: 39.6796 uW
+slack: 4.1
+data_arrival_time: 4.87
+start/end: Startpoint: out_reg[0] (rising edge-triggered flip-flop clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/8ns)
+total_cell_area: 1853.22199
+total_dynamic_power: 233.1819 uW
+cell_leakage_power: 39.6796 uW
+slack: 3.1
+data_arrival_time: 4.87
+start/end: Startpoint: out_reg[0] (rising edge-triggered flip-flop clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/7ns)
+total_cell_area: 1853.22199
+total_dynamic_power: 266.4936 uW
+cell_leakage_power: 39.6796 uW
+slack: 2.1
+data_arrival_time: 4.87
+start/end: Startpoint: out_reg[0] (rising edge-triggered flip-flop clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/6ns)
+total_cell_area: 1853.22199
+total_dynamic_power: 310.6700 uW
+cell_leakage_power: 39.6994 uW
+slack: 1.1
+data_arrival_time: 4.87
+start/end: Startpoint: out_reg[0] (rising edge-triggered flip-flop clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/5ns)
+total_cell_area: 1853.22199
+total_dynamic_power: 372.8040 uW
+cell_leakage_power: 39.6994 uW
+slack: 0.1
+data_arrival_time: 4.87
+start/end: Startpoint: out_reg[0] (rising edge-triggered flip-flop clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/4ns)
+total_cell_area: 1963.877984
+total_dynamic_power: 494.6457 uW
+cell_leakage_power: 43.1071 uW
+slack: 0.01
+data_arrival_time: 3.95
+start/end: Startpoint: out_reg[0] (rising edge-triggered flip-flop clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/3ns)
+total_cell_area: 2037.293982
+total_dynamic_power: 690.3037 uW
+cell_leakage_power: 45.3784 uW
+slack: 0.0
+data_arrival_time: 2.96
+start/end: Startpoint: input0[2] (input port clocked by clk) Endpoint: piped_product_reg[30] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/2ns)
+total_cell_area: 2116.029978
+total_dynamic_power: 1.1115 mW
+cell_leakage_power: 45.8313 uW
+slack: 0.0
+data_arrival_time: 1.96
+start/end: Startpoint: piped_product_reg[31] (rising edge-triggered flip-flop clocked by clk) Endpoint: out_reg[63] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/1.5ns)
+total_cell_area: 2169.495979
+total_dynamic_power: 1.5286 mW
+cell_leakage_power: 47.6742 uW
+slack: 0.0
+data_arrival_time: 1.46
+start/end: Startpoint: input0[7] (input port clocked by clk) Endpoint: piped_product_reg[30] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/1.25ns)
+total_cell_area: 2250.093975
+total_dynamic_power: 1.9517 mW
+cell_leakage_power: 50.1332 uW
+slack: 0.0
+data_arrival_time: 1.22
+start/end: Startpoint: input0[1] (input port clocked by clk) Endpoint: piped_product_reg[24] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/1.1875ns)
+total_cell_area: 2268.181975
+total_dynamic_power: 2.0649 mW
+cell_leakage_power: 50.6906 uW
+slack: 0.0
+data_arrival_time: 1.16
+start/end: Startpoint: input0[8] (input port clocked by clk) Endpoint: piped_product_reg[20] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/1.125ns)
+total_cell_area: 2328.031974
+total_dynamic_power: 2.2645 mW
+cell_leakage_power: 52.6330 uW
+slack_MET: None
+data_arrival_time: 1.14
+start/end: Startpoint: input0[13] (input port clocked by clk) Endpoint: piped_product_reg[28] (rising edge-triggered flip-flop clocked by clk)
+
+frequency: (1/1ns)
+total_cell_area: 2298.771976
+total_dynamic_power: 2.5236 mW
+cell_leakage_power: 51.8029 uW
+slack_MET: None
+data_arrival_time: 1.13
+start/end: Startpoint: input0[4] (input port clocked by clk) Endpoint: piped_product_reg[21] (rising edge-triggered flip-flop clocked by clk)

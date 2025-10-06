@@ -1,0 +1,169 @@
+m255
+K4
+z2
+Z0 !s12c _opt
+Z1 !s99 nomlopt
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+!s11f MIXED_VERSIONS
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z2 d/home/home5/hwu/ese507work/project_pt1
+T_opt
+!s110 1759728061
+Vg5Hb1k81T:8LQ0QCQb7zX2
+04 6 4 work mac_tb fast 0
+=1-7486e20ba0e2-68e351bd-61eed-2e8592
+R1
+!s12f OEM100
+!s12b OEM100
+!s124 OEM100
+o-quiet -auto_acc_if_foreign -work work
+Z3 tCvgOpt 0
+n@_opt
+OL;O;2023.4_3;77
+vmac
+Z4 2mac_pipe.sv|mac.sv|mac_tb.sv|params.sv
+Z5 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z6 !s110 1759728053
+!i10b 1
+!s100 ]lVKK^zBVQzmNF^REFQRm1
+IMe<D:65cJ0ez>g8^NVkC:2
+S1
+R2
+w1758870948
+8mac.sv
+Fmac.sv
+!i122 35
+L0 7 33
+Z7 VDg1SIo80bB@j0V0VzS_@n1
+Z8 OL;L;2023.4_3;77
+r1
+!s85 0
+31
+Z9 !s108 1759728052.000000
+Z10 !s107 params.sv|mac_tb.sv|mac.sv|mac_pipe.sv|
+Z11 !s90 +acc|mac_pipe.sv|mac.sv|mac_tb.sv|params.sv|mac_tb.c|
+!i113 0
+Z12 o+acc -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R3
+vmac_pipe
+R4
+R5
+R6
+!i10b 1
+!s100 _<^TC_=OQ<3^Ea@jUdnWI1
+IMENUo;7X`LGD7dP_TI3G]2
+S1
+R2
+w1759419964
+8mac_pipe.sv
+Fmac_pipe.sv
+!i122 35
+L0 7 47
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R3
+vmac_tb
+R4
+R5
+DXx4 work 14 mac_tb_sv_unit 0 22 VAm73>iFY4SSSX2BYc>8Y1
+R6
+R7
+r1
+!s85 0
+!i10b 1
+!s100 G7ka0^^ZiTFQcgH0?H3UN0
+IMe6LE5@VlinMACK<3kYPH0
+!s105 mac_tb_sv_unit
+S1
+R2
+w1758862817
+Z13 8mac_tb.sv
+Z14 Fmac_tb.sv
+!i122 35
+L0 39 99
+R8
+31
+R9
+R10
+R11
+!i113 0
+R12
+R3
+Xmac_tb_sv_unit
+!i114 1
+R4
+R5
+R6
+VVAm73>iFY4SSSX2BYc>8Y1
+r1
+!s85 0
+!i10b 1
+!s100 FUaiomD^QLaOZ4=X5P4n63
+IVAm73>iFY4SSSX2BYc>8Y1
+!i103 1
+S1
+R2
+w1759728559
+R13
+R14
+Fparams.sv
+!i122 35
+L0 19 0
+R8
+31
+R9
+R10
+R11
+!i113 0
+R12
+R3

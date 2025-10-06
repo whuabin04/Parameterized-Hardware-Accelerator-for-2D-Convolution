@@ -1,0 +1,30 @@
+#!/usr/bin/bash
+
+# script to generate the params.sv file based on the command line parameters, compile the code and testbench, and run simulation
+# usage: ./simParams1 [INW] [OUTW] [PIPELINED] [GUI]
+#    where you will replace [INW] [OUTW] and [PIPELINED] with the desired value of 
+#    those parameters 
+#    if [GUI] is 0, the simulation will run in waveform mode. If [GUI] is 1, it will 
+#    run QuestaSim in GUI mode
+# example: for INW=8, OUTW=24, PIPELINED=0, simulating at the command line only, run: 
+#        ./simParams1 8 24 0 0
+
+# If you want to run in GUI mode, you should run with & at the end, like
+#        ./simParams1 8 24 0 1 &
+
+# Note that this will compile all .sv and .c files in your directory. If instead you
+# only want to compile some of them, you can edit this or compile directly from the command line.
+
+if [ $# -ne 4 ]; then
+    echo "ERROR: incorrect number of parameters given."
+    echo "Usage: ./simParams1 [INW] [OUTW] [PIPELINED] [GUI]"
+    echo "See comments in simParams1 file for more information"
+else
+    ./genParams1 $1 $2 $3
+    vlog -64 +acc *.sv *.c
+    if [[ $4 -eq 0 ]]; then
+        vsim -64 -sv_seed random -c mac_tb -do "run -all; quit"
+    else 
+        vsim -64 -sv_seed random mac_tb
+    fi
+fi
