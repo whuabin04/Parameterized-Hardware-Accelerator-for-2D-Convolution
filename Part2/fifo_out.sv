@@ -22,63 +22,92 @@ module fifo_out #(
     input               OUT_AXIS_TREADY     
 );
 
-    lgoic wr_en, rd_en;
-    assign wr_en = IN_AXIS_TVALID && IN_AXIS_TREADY;    // write enable signal for receiving side
-    assign rd_en = OUT_AXIS_TVALID && OUT_AXIS_TREADY;  // read enable signal for transmitting side
+    logic wr_en, rd_en;
+    assign wr_en = (IN_AXIS_TVALID && IN_AXIS_TREADY);    // write enable signal for receiving side
+    assign rd_en = (OUT_AXIS_TVALID && OUT_AXIS_TREADY);  // read enable signal for transmitting side
 
-    // capacity logic of the FIFO ////////////////////////////////////////////
-    logic [$clog2(DEPTH+1)-1 : 0] capacity;               // capacity ranges from 0 to DEPTH             
+  //----------------------------------------------------------
+    //  Capacity counter  (0 = full, DEPTH = empty)
+    //----------------------------------------------------------
+    logic [$clog2(DEPTH+1)-1 : 0] capacity;             // capacity ranges from 0 to DEPTH   
+                                                        // think how many spaces are available in the FIFO          
 
     assign OUT_AXIS_TVALID = (capacity < DEPTH);        // drives OUT_AXIS_TVALID - valid if *receiving* FIFO is not empty
-    assign IN_AXIS_TREADY = ();                         // drives IN_AXIS_TREADY - ready if *receiving* FIFO is not full
+    assign IN_AXIS_TREADY = (capacity >= 0);             // drives IN_AXIS_TREADY - ready if *receiving* FIFO is not full
     
-    always_ff @(pos_edge clk) begin
+    always_ff @(posedge clk) begin
         if(reset) begin
+
             capacity <= DEPTH;                      // think capacity as space available
+
         end else begin
-            case ({wr_en, rd_en})
+
+            case ({rd_en, wr_en})
                 2'b10: capacity <= capacity + 1;    // reading, but not writing, increase the capacity by 1
                 2'b01: capacity <= capacity - 1;    // writing, but not reading, decrease the capacity by 1
                 default: capacity <= capacity;      // no change
             endcase
+
         end
     end
     
-    //////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
 
 
 
-    logic [LOGDEPTH-1:0] write_ptr, read_ptr; 
-    
+    logic [LOGDEPTH-1 : 0] read_ptr; 
+    logic [LOGDEPTH-1 : 0] wr_addr, rd_addr;
 
     // assert IN_AXIS_TVALID to write
     // assert OUT_AXIS_TREADY to read
 
     // head write address logic 
-    always_ff @(pos_edge clk) begin
+    always_ff @(posedge clk) begin
         if(reset) begin
-            write_ptr <= '0;
+            wr_addr <= '0;
         end
         else if() begin
-            write_ptr <= write_ptr + 1;
+            wr_addr <= wr_addr + 1;
         end
     end
 
     // tail read address logic
-    always_ff @(pos_edge clk) begin
-
+    //read_pointer == tail on the graph
+    always_comb begin
+        if (rd_en) begin
+            rd_addr = read_ptr + 1;
+        end else begin
+            rd_addr = read_ptr;
+        end
+    end
+    always_ff @(posedge clk) begin
+        if(reset) begin
+            read_ptr <= '0;
+        end else begin                  // advance the read address when reading
+            read_ptr <= rd_addr;
+        end
     end
 
     // main fifo logic
-    always_ff @(pos_edge clk) begin
+    always_ff @(posedge clk) begin
         if(reset) begin
             OUT_AXIS_TDATA <= '0;
-
-
         end
+    end 
+
+    memory_dual_port #(
+        .WIDTH(OUTW),
+        .SIZE(DEPTH)
+    ) fifo_mem (
+        .data_in(IN_AXIS_TDATA),
+        .data_out(OUT_AXIS_TDATA),
+        .write_addr(wr_addr),
+        .read_addr(read_ptr),
+        .clk(clk),
+        .wr_en(wr_en)
+    );
 
 
-    end
 endmodule
 
 module memory_dual_port #(
