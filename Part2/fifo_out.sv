@@ -5,7 +5,6 @@
 // Ryan Lin (114737153)
 // Project Part 2: Output FIFO
 
-
 module fifo_out #(
     parameter   OUTW = 24,  // # of btis for each data word
     parameter   DEPTH = 19, // # of entries in the FIFO
@@ -14,22 +13,22 @@ module fifo_out #(
     input               clk, reset,
 
     input [OUTW-1 : 0]  IN_AXIS_TDATA,      // receiving interface
-    input               IN_AXIS_TVALID, 
-    output              IN_AXIS_TREADY,     
+    input               IN_AXIS_TVALID,     // *think - the transmitter is telling us that there is some data coming in*
+    output              IN_AXIS_TREADY,     // *think - this receiver has available space to receive data*
 
-    output [OUTW-1 : 0] OUT_AXIS_TDATA,     // transmitting interface
-    output              OUT_AXIS_TVALID
-    input               OUT_AXIS_TREADY     
+    output logic [OUTW-1 : 0]   OUT_AXIS_TDATA,     // transmitting interface
+    output logic                OUT_AXIS_TVALID,    // *think - this transmitter has some valid data to be read*
+    input                       OUT_AXIS_TREADY     // *think - the receiving end has available space to take in data from us*
 );
 
     logic wr_en, rd_en;
     assign wr_en = (IN_AXIS_TVALID && IN_AXIS_TREADY);    // write enable signal for receiving side
     assign rd_en = (OUT_AXIS_TVALID && OUT_AXIS_TREADY);  // read enable signal for transmitting side
 
-  //----------------------------------------------------------
-    //  Capacity counter  (0 = full, DEPTH = empty)
     //----------------------------------------------------------
-    logic [$clog2(DEPTH+1)-1 : 0] capacity;             // capacity ranges from 0 to DEPTH   
+    //  capacity logic  (0 = full, DEPTH = empty)
+    //----------------------------------------------------------
+    logic unsigned [$clog2(DEPTH+1)-1 : 0] capacity;             // capacity ranges from 0 to DEPTH   
                                                         // think how many spaces are available in the FIFO          
 
     assign OUT_AXIS_TVALID = (capacity < DEPTH);        // drives OUT_AXIS_TVALID - valid if *receiving* FIFO is not empty
@@ -50,50 +49,76 @@ module fifo_out #(
 
         end
     end
-    
-    /////////////////////////////////////////////////////////////////////////
-
-
+    //----------------------------------------------------------
 
     logic [LOGDEPTH-1 : 0] read_ptr; 
     logic [LOGDEPTH-1 : 0] wr_addr, rd_addr;
 
-    // assert IN_AXIS_TVALID to write
-    // assert OUT_AXIS_TREADY to read
-
-    // head write address logic 
+    //----------------------------------------------------------
+    //  head write address logic 
+    //----------------------------------------------------------
     always_ff @(posedge clk) begin
         if(reset) begin
+
             wr_addr <= '0;
-        end
-        else if() begin
-            wr_addr <= wr_addr + 1;
+
+        end else if(wr_en) begin
+
+            if(wr_addr == DEPTH - 1) begin
+
+                wr_addr <= '0;
+
+            end else begin
+
+                wr_addr <= wr_addr + 1;
+
+            end
         end
     end
+    //----------------------------------------------------------
 
+
+    //----------------------------------------------------------
     // tail read address logic
-    //read_pointer == tail on the graph
-    always_comb begin
-        if (rd_en) begin
-            rd_addr = read_ptr + 1;
-        end else begin
-            rd_addr = read_ptr;
-        end
-    end
+    //----------------------------------------------------------
     always_ff @(posedge clk) begin
         if(reset) begin
-            read_ptr <= '0;
-        end else begin                  // advance the read address when reading
-            read_ptr <= rd_addr;
+
+            read_ptr <= '0;         // read_pointer == tail on the graph
+
+        end else if(rd_en) begin 
+
+            if(read_ptr == DEPTH - 1) begin
+
+                read_ptr <= '0;
+
+            end else begin
+
+                read_ptr <= read_ptr + 1;
+
+            end
         end
     end
 
-    // main fifo logic
-    always_ff @(posedge clk) begin
-        if(reset) begin
-            OUT_AXIS_TDATA <= '0;
+    always_comb begin
+        if(rd_en == 0) begin
+
+            rd_addr = read_ptr;
+
+        end else begin
+
+            if(read_ptr == DEPTH - 1) begin
+
+                rd_addr = '0;
+
+            end else begin
+
+                rd_addr = read_ptr + 1;
+                
+            end
         end
-    end 
+    end
+    //----------------------------------------------------------
 
     memory_dual_port #(
         .WIDTH(OUTW),
@@ -102,7 +127,7 @@ module fifo_out #(
         .data_in(IN_AXIS_TDATA),
         .data_out(OUT_AXIS_TDATA),
         .write_addr(wr_addr),
-        .read_addr(read_ptr),
+        .read_addr(rd_addr),
         .clk(clk),
         .wr_en(wr_en)
     );
