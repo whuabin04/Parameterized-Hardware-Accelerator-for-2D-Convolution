@@ -32,21 +32,27 @@ module fifo_out #(
                                                         // think how many spaces are available in the FIFO          
 
     assign OUT_AXIS_TVALID = (capacity < DEPTH);        // drives OUT_AXIS_TVALID - valid if *receiving* FIFO is not empty
-    assign IN_AXIS_TREADY = (capacity >= 0);             // drives IN_AXIS_TREADY - ready if *receiving* FIFO is not full
+    assign IN_AXIS_TREADY = (capacity > 0);             // drives IN_AXIS_TREADY - ready if *receiving* FIFO is not full
     
     always_ff @(posedge clk) begin
         if(reset) begin
 
-            capacity <= DEPTH;                      // think capacity as space available
+            capacity <= DEPTH; // think capacity as space available
 
         end else begin
 
             case ({rd_en, wr_en})
-                2'b10: capacity <= capacity + 1;    // reading, but not writing, increase the capacity by 1
-                2'b01: capacity <= capacity - 1;    // writing, but not reading, decrease the capacity by 1
-                default: capacity <= capacity;      // no change
+                2'b10: begin
+                    if (capacity < DEPTH)  // Prevent overflow
+                        capacity <= capacity + 1;
+                end
+                2'b01: begin
+                    if (capacity > 0)      // Prevent underflow
+                        capacity <= capacity - 1;
+                end
+                default: capacity <= capacity; // no change
             endcase
-
+            
         end
     end
     //----------------------------------------------------------
