@@ -50,30 +50,36 @@ module input_mems #(
     //             -> K value is treated as 'don't care' but should be same as previous K
 
     logic [K_BITS-1 : 0]    TUSER_K;    // size of the kernel K variable
-    assign TUSER_K = AXIS_TUSER[K_BITS : 1];
-
     logic                   new_W;      // control bit to indicate whether a new W matrix is being sent
+
+    assign TUSER_K = AXIS_TUSER[K_BITS : 1];
     assign new_W = AXIS_TUSER[0];   
-    //-----AXIS_TUSER breakdown-----
+    //-----END OF AXIS_TUSER breakdown-----
 
+    logic enable;
+    assign enable = (AXIS_TVALID && AXIS_TREADY);
 
-
+    logic W_wr_en;
+    logic X_wr_en;
     
     typedef enum logic [2:0] {
         idle_state = 3'd0,
         input_W_matrix_state = 3'd1,
-        input_B_matrix_state = 3'd2,
+        input_B_value_state = 3'd2,
         input_X_matrix_state = 3'd3,
         inputs_loaded_state = 3'd4
     } state_t;
     
     state_t current_state, next_state;
 
-    logic w_ngr_is_done;
-    logic b_ngr_is_done;
-    logic x_ngr_is_done;
+    logic W_is_done;
+    logic B_is_done;
+    logic X_is_done;
 
-
+    logic [W_ADDR_BITS-1 : 0] W_write_counter;
+    logic [X_ADDR_BITS-1 : 0] X_write_counter;
+    logic [W_ADDR_BITS-1 : 0] internal_w_addr;
+    logic [X_ADDR_BITS-1 : 0] internal_x_addr;
 
     //------------------NEXT STATE LOGIC--------------------
     always_comb begin
@@ -93,7 +99,7 @@ module input_mems #(
             end
  
             input_W_matrix_state: begin
-                if(w_ngr_is_done) begin
+                if(W_is_done) begin
                     next_state = input_B_value_state;
                 end
                 else begin
@@ -105,7 +111,7 @@ module input_mems #(
             will be stored in the B register. This phase is complete after one word is loaded. This step
             is skipped if new_W was 0 at the start of the input operation above. */
             input_B_value_state: begin
-                if(b_ngr_is_done) begin
+                if(B_is_done) begin
                     next_state = input_X_matrix_state;
                 end
                 else begin
@@ -116,7 +122,7 @@ module input_mems #(
             input interface. This data will be stored in the X memory. This phase is complete after the
             entire X matrix is loaded (R*C values). */
             input_X_matrix_state: begin
-                if(x_ngr_is_done) begin
+                if(X_is_done) begin
                     next_state = inputs_loaded_state;
                 end
                 else begin
@@ -148,14 +154,28 @@ module input_mems #(
             end
         endcase
     end
-    //------------------NEXT STATE LOGIC--------------------
-
+    //------------------END OF NEXT STATE LOGIC--------------------
 
 
     //-------------------OUTPUT LOGIC--------------------
     always_comb begin
-        AXIS_TREADY = 0;
-        inputs_loaded = 0;
+        inputs_loaded = 0;      // extra measure
+        internal_w_addr = W_read_addr;
+        internal_x_addr = X_read_addr;
+        W_wr_en = 0;
+        X_wr_en = 0;
+
+        // logic to look ahead
+        if((next_state == input_W_matrix_state) && enable) begin
+            W_wr_en = 1;
+            internal_w_addr = W_write_counter;
+        end
+        
+        if((next_state == input_X_matrix_state) && enable) begin
+            X_wr_en = 1;
+            internal_x_addr = X_write_counter;
+        end
+        //
         
         case(current_state) 
             idle_state: begin
@@ -164,6 +184,12 @@ module input_mems #(
 
             input_W_matrix_state: begin
                 AXIS_TREADY = 1;
+                internal_w_addr = W_write_counter;
+                W_wr_en = enable;
+
+                if(next_state == input_B_value_state) begin
+                    W_wr_en = 0;
+                end
             end
 
             input_B_value_state: begin
@@ -172,27 +198,25 @@ module input_mems #(
 
             input_X_matrix_state: begin
                 AXIS_TREADY = 1;
+                internal_x_addr = X_write_counter;
+                X_wr_en = enable;
+
+                if(next_state == inputs_loaded_state) begin
+                    AXIS_TREADY = 0;            // should pull X_wr_en low at the same time
+                end
             end
-    
-            inputs_loaded_state: begin
-                if(compute_finished == 1) begin
+                                                                // during input loaded state, the convolution module will read from this memory
+            inputs_loaded_state: begin                          // based on the read addresses provided (W_read_addr and X_read_addr)
+                if(compute_finished) begin
                     inputs_loaded = 0;
-                    AXIS_TREADY = 1;
-                    
                 end
-                else begin
-                    inputs_loaded = 1;
-                    AXIS_TREADY = 0;
-                end
+
+                inputs_loaded = 1;              
+                AXIS_TREADY = 0;
             end
         endcase
     end
-    //-------------------OUTPUT LOGIC--------------------
-
-
-
-    logic enable;
-    assign enable = (AXIS_TVALID && AXIS_TREADY);
+    //-------------------END OF OUTPUT LOGIC--------------------
 
 
 
@@ -202,9 +226,9 @@ module input_mems #(
         if(reset) begin
             K <= '0;
         end
-        else if((current_state == input_W_matrix_state) && enable) begin
+        else if((current_state == idle_state) && enable && new_W) begin
             K <= TUSER_K;
-        end
+        end             
         else begin
             K <= K;     
         end
@@ -214,31 +238,16 @@ module input_mems #(
     always_ff @(posedge clk) begin
         if(reset) begin
             B <= '0;
-            b_ngr_is_done <= 0;
+            B_is_done <= 0;
         end 
-        else if((current_state == input_B_value_state) && enable) begin
-            B <= AXIS_TDATA;
-            b_ngr_is_done <= 1;
+        else if((current_state == input_B_value_state) && (next_state != input_B_value_state)) begin
+            B_is_done <= 0;
         end
-        else begin
-            B <= B;
-            if (current_state != input_B_value_state) begin
-                b_ngr_is_done <= 0;
-            end
+        else if(((current_state == input_W_matrix_state) && (next_state == input_B_value_state) || (current_state == input_B_value_state )) && enable) begin
+            B <= AXIS_TDATA;
+            B_is_done <= 1;
         end
     end
-
-    // X matrix register logic
-    memory #(
-        .WIDTH(INW),
-        .SIZE(R*C)
-    ) X_memory_inst (
-        .data_in(AXIS_TDATA),
-        .data_out(X_data),
-        .addr(X_read_addr),
-        .clk(clk),
-        .wr_en((current_state == input_X_matrix_state) && enable)
-    );
 
     // W matrix register logic
     memory #(
@@ -247,39 +256,70 @@ module input_mems #(
     ) W_memory_inst (
         .data_in(AXIS_TDATA),
         .data_out(W_data),
-        .addr(W_read_addr),
+        .addr(internal_w_addr),
         .clk(clk),
-        .wr_en((current_state == input_W_matrix_state) && enable)
+        .wr_en(W_wr_en)
     );
-    //------------------REGISTER AND MEMORY LOGIC--------------------
 
-    //W address pointer + done signal
+    // X matrix register logic
+    memory #(
+        .WIDTH(INW),
+        .SIZE(R*C)
+    ) X_memory_inst (
+        .data_in(AXIS_TDATA),
+        .data_out(X_data),
+        .addr(internal_x_addr),
+        .clk(clk),
+        .wr_en(X_wr_en)
+    );
+    //------------------END OF REGISTER AND MEMORY LOGIC--------------------
+
+
+    //------------------COUNTER LOGIC--------------------
+ // W address pointer + done signal
     always_ff @(posedge clk) begin
-        if(reset || current_state != input_W_matrix_state) begin
-            w_ngr_is_done <= 0;
-            W_read_addr <= 0;
+        if(reset) begin
+            W_is_done <= '0;
+            W_write_counter <= 0;
         end
-        else if (current_state == input_W_matrix_state && enable) begin
-            W_read_addr <= W_read_addr + 1;
-            if (W_read_addr == (MAXK*MAXK - 1)) begin
-                w_ngr_is_done <= 1;
-            end 
+        else if((current_state != input_W_matrix_state) && 
+                !((current_state == idle_state) && (next_state == input_W_matrix_state) && enable)) begin
+            W_is_done <= 0;
+            W_write_counter <= 0;
+        end
+        else if (enable && ((current_state == input_W_matrix_state) || 
+                ((current_state == idle_state) && (next_state == input_W_matrix_state))) && !W_is_done) begin
+            W_write_counter <= W_write_counter + 1;
+            
+            if (W_write_counter == (K*K - 1)) begin  // Set done BEFORE last write
+                W_is_done <= 1;
+            end
         end
     end
 
-    //X Address Pointer + done signal
+     // X address Pointer + done signal
     always_ff @(posedge clk) begin
-        if(reset || current_state != input_X_matrix_state) begin
-            x_ngr_is_done <= 0;
-            X_read_addr <= 0;
+        if(reset) begin
+            X_is_done <= 0;
+            X_write_counter <= 0;
         end
-        else if (current_state == input_X_matrix_state && enable) begin
-            X_read_addr <= X_read_addr + 1;
-            if (X_read_addr == (R*C - 1)) begin
-                x_ngr_is_done <= 1;
-            end 
+        else if((current_state != input_X_matrix_state) && 
+                !(((current_state == input_B_value_state) && (next_state == input_X_matrix_state)) || 
+                ((current_state == idle_state) && (next_state == input_X_matrix_state)) && enable)) begin
+            X_is_done <= 0;
+            X_write_counter <= 0;
+        end
+        else if (enable && ((current_state == input_X_matrix_state) || 
+                ((current_state == idle_state) && (next_state == input_X_matrix_state)) ||
+                ((current_state == input_B_value_state) && (next_state == input_X_matrix_state))) && !X_is_done) begin
+            X_write_counter <= X_write_counter + 1;
+
+            if (X_write_counter == (R*C - 1)) begin  // Set done BEFORE last write
+                X_is_done <= 1;
+            end
         end
     end
+    //------------------END OF COUNTER LOGIC--------------------
             
     // sequential block
     always_ff @(posedge clk) begin
