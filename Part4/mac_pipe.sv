@@ -26,7 +26,7 @@ module mac_pipe #(      // default
 
     // more determistic approach
     always_ff @(posedge clk) begin // multiply to be independent of init_acc control signal
-        if (reset) begin
+        if(reset) begin
             piped_product <= '0;
             enable_accumulate <= 1'b0;
         end
@@ -38,15 +38,15 @@ module mac_pipe #(      // default
     end
 
     always_ff @(posedge clk) begin
-        unique if (reset) begin
+        if(reset) begin
             out <= '0;  // reset the accumulator to 0
         end
 
-        else if (init_acc) begin // assume reset takes precedence
+        else if(init_acc) begin // assume reset takes precedence
             out <= init_value;  // load the initial value into the accumulator
         end
 
-        else if (enable_accumulate) begin
+        else if(enable_accumulate) begin
             out <= piped_product + out;
         end
 

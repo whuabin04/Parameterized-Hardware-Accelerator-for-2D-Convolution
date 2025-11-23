@@ -7,10 +7,10 @@
 // Project Part 3: Input Memories
 
 module input_mems #(
-    parameter INW = 10,
-    parameter R = 15,
-    parameter C = 13,
-    parameter MAXK = 7,
+    parameter INW = 24,
+    parameter R = 9,
+    parameter C = 8,
+    parameter MAXK = 4,
     localparam K_BITS = $clog2(MAXK+1),
     
     localparam X_ADDR_BITS = $clog2(R*C),
@@ -160,11 +160,12 @@ module input_mems #(
 
     //-------------------OUTPUT LOGIC--------------------
     always_comb begin
-        inputs_loaded = 0;      // extra measure
+        inputs_loaded = 1'b0;      // extra measure
         internal_w_addr = W_read_addr;
         internal_x_addr = X_read_addr;
-        W_wr_en = 0;
-        X_wr_en = 0;
+        W_wr_en = 1'b0;
+        X_wr_en = 1'b0;
+        AXIS_TREADY = 1'b0;
 
         // logic to look ahead
         if((next_state == input_W_matrix_state) && enable) begin
@@ -203,6 +204,7 @@ module input_mems #(
                 X_wr_en = enable;
 
                 if(next_state == inputs_loaded_state) begin
+                    inputs_loaded = 1;
                     AXIS_TREADY = 0;            // should pull X_wr_en low at the same time
                 end
             end
