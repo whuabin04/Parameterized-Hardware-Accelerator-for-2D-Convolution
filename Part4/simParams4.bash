@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+
+# script to generate the params.sv file based on the command line parameters, 
+# compile the code and testbench, and run simulation.
+# usage: ./simParams4 [INW] [R] [C] [MAXK] [TVALID_PROB] [TREADY_PROB] [GUI]
+#    where you will replace [*] with the desired value of those parameters.
+#    Remember that if TVALID_PROB/TREADY_PROB = 0, the testbench will randomize it.
+
+#    if [GUI] is 0, the simulation will run in waveform mode. If [GUI] is 1, it will 
+#    run QuestaSim in GUI mode
+
+# example: for INW=12, R=5, C=4, MAXK=5 with random TREADY/TVALID, simulating at the command line only, run: 
+#        ./simParams4 12 8 8 5 0 0 0
+
+# If you want to run in GUI mode, you should run with & at the end, like
+#        ./simParams4 12 8 8 5 0 0 1 &
+
+# Note that this will compile all .sv files in your directory. If instead you
+# only want to compile some of them, you can edit this or compile directly from the command line.
+
+if [ $# -ne 7 ]; then
+    echo "ERROR: incorrect number of parameters given."
+    echo "Usage: ./simParams4 [INW] [R] [C] [MAXK] [TVALID_PROB] [TREADY_PROB] [GUI]"
+    echo "See comments in simParams4 file for more information"
+else
+    ./genParams4 $1 $2 $3 $4 $5 $6 
+    vlog -64 +acc *.sv *.c
+    if [[ $7 -eq 0 ]]; then
+        vsim -64 -sv_seed random -c Conv_tb -do "run -all; quit"
+    else 
+        vsim -64 -sv_seed random Conv_tb
+    fi
+fi
