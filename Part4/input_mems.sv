@@ -296,6 +296,7 @@ module input_mems #(
             
             if (W_write_counter == (K*K - 1)) begin  // Set done BEFORE last write
                 W_is_done <= 1;
+                W_write_counter <= 0;
             end
         end
     end
@@ -319,6 +320,7 @@ module input_mems #(
 
             if (X_write_counter == (R*C - 1)) begin  // Set done BEFORE last write
                 X_is_done <= 1;
+                X_write_counter <= 0;
             end
         end
     end

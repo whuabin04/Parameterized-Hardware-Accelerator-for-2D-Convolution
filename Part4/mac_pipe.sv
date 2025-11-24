@@ -31,9 +31,14 @@ module mac_pipe #(      // default
             enable_accumulate <= 1'b0;
         end
 
-        else begin
+        else if(input_valid) begin
             piped_product <= input0 * input1;
             enable_accumulate <= input_valid; // pipe the input_valid signal
+        end
+
+        else begin
+            piped_product <= piped_product;
+            enable_accumulate <= 1'b0;
         end
     end
 
