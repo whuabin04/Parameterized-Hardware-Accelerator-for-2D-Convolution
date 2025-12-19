@@ -37,6 +37,7 @@ Conv #(
     .OUTPUT_TVALID(),
     .OUTPUT_TREADY()
 );
+```
 
 ---
 # ⚠️ License & Academic Integrity
