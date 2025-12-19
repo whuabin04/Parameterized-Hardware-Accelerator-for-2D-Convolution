@@ -41,4 +41,4 @@ Conv #(
 
 ---
 **Copyright (c) 2025 Huabin Wu & Ryan Lin. All Rights Reserved.**
-This code is for demonstration purposes only. It is not licensed for use, modification, or distribution.
+For demonstration purposes only. It is not licensed for use, modification, or distribution.
