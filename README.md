@@ -40,6 +40,5 @@ Conv #(
 ```
 
 ---
-# ⚠️ License & Academic Integrity
-**Copyright (c) 2025 Huabin Wu. All Rights Reserved.**
-This code is for **demonstration purposes only**. It is not licensed for use, modification, or distribution.
+**Copyright (c) 2025 Huabin Wu & Ryan Lin. All Rights Reserved.**
+This code is for demonstration purposes only. It is not licensed for use, modification, or distribution.
