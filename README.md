@@ -10,7 +10,6 @@ A high-performance, parameterized hardware accelerator for 2D image convolution 
 * **Standard Interface:** AXI4-Stream compliant input/output with back-pressure handling.
 
 ## 🛠️ Architecture
-*(Insert a Block Diagram here. It should show: Input Buffer -> MAC Array -> FSM -> Output FIFO)*
 ![Block Diagram](docs/block_diagram.png)
 
 ## 🧪 Verification (DPI-C)
