@@ -18,16 +18,6 @@ The design was verified using a **Constrained-Random** testbench in Questasim.
 * **DPI-C Co-Simulation:** A C++ Reference model is connected via SystemVerilog DPI to validate RTL output against software-computed expected values.
 * **Coverage:** Functional coverage focuses on FIFO full/empty states and AXI handshake randomization.
 
-### Waveform Demo
-![Waveform](docs/waveform_demo.png)
-
-## 📊 Performance Results
-| Metric | Value | Technology |
-| :--- | :--- | :--- |
-| **Max Frequency** | **855 MHz** | Nangate 45nm (ASIC) |
-| **Throughput** | 1 Pixel / Clock | (After pipeline fill) |
-| **Logic Cells** | [Insert Number] | [Insert Area Unit] |
-
 ## 💻 Usage
 ```systemverilog
 // Example Instantiation
